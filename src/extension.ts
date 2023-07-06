@@ -1,16 +1,14 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
-// import util from 'util';
 const util = require('./util');
 
-let ethPrice = ""; // 初始价格
-
+let tokenPrice = ""; 
 let statusBarItemsArray:[] = [];
 let statusBarItems: vscode.StatusBarItem[] = [];
 
 export function activate(context: vscode.ExtensionContext){
-    init();
-    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(() => handleConfigChange()));
+    init(); // the main body of the application
+    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(() => handleConfigChange())); // make sure the change of configuration will reflect on the windows on time.
 }
 
 function handleConfigChange() {
@@ -18,56 +16,62 @@ function handleConfigChange() {
 }
 
 function init(){
+
+    // dispose the old statusBar if any.
     for (const statusBarItem of statusBarItems) {
         statusBarItem.dispose();
     }
-
     statusBarItems.length = 0;
+
+    // check the status of enable feature.
+    const enable = util.getConfigurationEnable();
+    if(!enable) return;
+
+    // get the basic configuration.
     let intervalId = null;
     statusBarItemsArray = util.getConfigurationToeknList();
     const updateInterval = util.getConfigurationUpdateInterval();
-
-    const enable = util.getConfigurationEnable();
-    if(!enable) return;
-    
     const position =vscode.StatusBarAlignment[util.getConfigurationPosition()];
+
+    // create the items in status bar depends on the number of token.
     for (const item of statusBarItemsArray) {
         const statusBarItem = vscode.window.createStatusBarItem(position);
         statusBarItems.push(statusBarItem);
     }
 
+    // update the token price.
     intervalId = setInterval(() => {
         updatePriceList();
-    }, updateInterval); // 每隔一分钟更新一次
+    }, updateInterval); // the polling frequency.
 }
 
 function updatePriceList(){
+    // TODO: support the search of the dex token price.
+    // TODO: support the cluster search for the cex token.
     for (let i = 0; i < statusBarItemsArray.length; i++) {
-        // statusBarItems[i].text = getStatusBarItemText(i); // Define your logic to determine the text
         getCexPrice(statusBarItems[i],statusBarItemsArray[i]); 
         statusBarItems[i].show();
     }
 }
 
 export function deactivate() {
-    // 插件停用时的清理逻辑
     // clearInterval(intervalId);
 
     for (const statusBarItem of statusBarItems) {
         statusBarItem.dispose();
     }
-
     statusBarItems.length = 0;
     console.log('extension released.');
 }
 
+//TODO: support a uniform function  
 async function getCexPrice(statusBarItem: vscode.StatusBarItem, tokenID:"string"){
     try {
         var url =  util.getConfigurationCexURL() + tokenID;
         const response = await axios.get(url);
         const price = response.data.data["0"].last;
-        ethPrice = price.toLocaleString("en-US", { style: "currency", currency: "USD" });
-        statusBarItem.text = util.convertCexTokenName(tokenID)+ ": " + ethPrice; // 更新价格
+        tokenPrice = price.toLocaleString("en-US", { style: "currency", currency: "USD" });
+        statusBarItem.text = util.convertCexTokenName(tokenID)+ ": " + tokenPrice; 
     } catch (error) {
         console.error("Failed to fetch token price:", error);
     }

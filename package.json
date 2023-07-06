@@ -1,8 +1,19 @@
 {
   "name": "monitor",
   "displayName": "PriceMonitor",
-  "description": "",
+  "description": "Token price monitor, suppoort both cex price and dex price. The cex api was supported by okx. The dex api was supported by dexscreener. You could customize the token list as you like.",
   "version": "1.0.3",
+  "publisher": "elon",
+  "keywords": [
+    "btc",
+    "eth",
+    "token",
+    "price",
+    "okx",
+    "cex",
+    "vscode",
+    "dex"
+  ],
   "engines": {
     "vscode": "^1.77.0"
   },
@@ -19,14 +30,14 @@
         "monitor.enable": {
           "type": "boolean",
           "default": true,
-          "description": "Enable display price. \n 是否开启"
+          "description": "Enable display price. \n"
         },
 
         "monitor.updateInterval":{
           "type":"number",
-          "default":3000,
-          "minimum":1000,
-          "description":"The Frequency should not be larger than 20 times per second, Unit: ms"
+          "default":1000,
+          "minimum":50,
+          "description":"The period during polling requests in milliseconds. It should be larger than 50 to avoid beyond the limit."
         },
 
         "monitor.tokenList":{
@@ -35,7 +46,7 @@
             "BTC-USDT",
             "ETH-USDT"
           ],
-          "description": "",
+          "description": "Array of token pari to display. \nCEX token use the format like 'BTC-USDT'. DEX token use the token contract like '0x6982508145454Ce325dDbE47a25d4ec3d2311933' ",
           "items": {
             "type" : "string"
           },
@@ -52,6 +63,9 @@
             "Right",
             "Left"
           ],
+          "enumDescriptions": [
+            "Displayed on the right side of the status bar. \n 展示在状态栏右侧",
+            "Displayed on the left side of the status bar. \n 展示在状态栏左侧"],
           "description" : ""
         },
 
@@ -87,6 +101,10 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elon-Wang/monitor"
+  },
   "devDependencies": {
     "@types/vscode": "^1.77.0",
     "@types/glob": "^8.1.0",
@@ -99,5 +117,8 @@
     "mocha": "^10.2.0",
     "typescript": "^4.9.5",
     "@vscode/test-electron": "^2.3.0"
+  },
+  "dependencies": {
+    "axios": "^0.26.1"
   }
 }
