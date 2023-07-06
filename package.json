@@ -1,0 +1,103 @@
+{
+  "name": "monitor",
+  "displayName": "PriceMonitor",
+  "description": "",
+  "version": "1.0.3",
+  "engines": {
+    "vscode": "^1.77.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "monitor.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable display price. \n 是否开启"
+        },
+
+        "monitor.updateInterval":{
+          "type":"number",
+          "default":3000,
+          "minimum":1000,
+          "description":"The Frequency should not be larger than 20 times per second, Unit: ms"
+        },
+
+        "monitor.tokenList":{
+          "type":"array",
+          "default": [
+            "BTC-USDT",
+            "ETH-USDT"
+          ],
+          "description": "",
+          "items": {
+            "type" : "string"
+          },
+          "markdownDeprecation": "",
+          "scope" : "resource",
+          "title" : "",
+          "uniqueItems": true
+        },
+
+        "monitor.Position":{
+          "type" : "string",
+          "default" : "Left",
+          "enum" : [
+            "Right",
+            "Left"
+          ],
+          "description" : ""
+        },
+
+        "monitor.DisplayMode":{
+          "type" : "string",
+          "default" : "Token",
+          "description" : "",
+          "enum": [
+            "Full",
+            "Token",
+            "Initials",
+            "None"
+          ]
+        },
+
+        "monitor.CexURL":{
+          "type" : "string",
+          "default": "https://www.okx.com/api/v5/market/ticker?instId="
+        },
+        
+        "monitor.DexURL":{
+          "type" : "string",
+          "default": "https://api.dexscreener.com/latest/dex/tokens/"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.77.0",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.36.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "typescript": "^4.9.5",
+    "@vscode/test-electron": "^2.3.0"
+  }
+}
