@@ -26,53 +26,52 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
+      "title": "Token Price Monitor",
       "properties": {
         "monitor.enable": {
           "type": "boolean",
           "default": true,
           "description": "Enable display price. \n"
         },
-
-        "monitor.updateInterval":{
-          "type":"number",
-          "default":1000,
-          "minimum":50,
-          "description":"The period during polling requests in milliseconds. It should be larger than 50 to avoid beyond the limit."
+        "monitor.updateInterval": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 50,
+          "description": "The period during polling requests in milliseconds. It should be larger than 50 to avoid beyond the limit."
         },
-
-        "monitor.tokenList":{
-          "type":"array",
+        "monitor.tokenList": {
+          "type": "array",
           "default": [
             "BTC-USDT",
-            "ETH-USDT"
+            "ETH-USDT",
+            "0x6982508145454Ce325dDbE47a25d4ec3d2311933"
           ],
-          "description": "Array of token pari to display. \nCEX token use the format like 'BTC-USDT'. DEX token use the token contract like '0x6982508145454Ce325dDbE47a25d4ec3d2311933' ",
+          "description": "Array of token pair to display. \nCEX token use the format like 'BTC-USDT'. \nDEX token use the token contract like '0x6982508145454Ce325dDbE47a25d4ec3d2311933'",
           "items": {
-            "type" : "string"
+            "type": "string"
           },
           "markdownDeprecation": "",
-          "scope" : "resource",
-          "title" : "",
+          "scope": "resource",
+          "title": "",
           "uniqueItems": true
         },
-
-        "monitor.Position":{
-          "type" : "string",
-          "default" : "Left",
-          "enum" : [
+        "monitor.Position": {
+          "type": "string",
+          "default": "Right",
+          "enum": [
             "Right",
             "Left"
           ],
           "enumDescriptions": [
             "Displayed on the right side of the status bar. \n 展示在状态栏右侧",
-            "Displayed on the left side of the status bar. \n 展示在状态栏左侧"],
-          "description" : ""
+            "Displayed on the left side of the status bar. \n 展示在状态栏左侧"
+          ],
+          "description": ""
         },
-
-        "monitor.DisplayMode":{
-          "type" : "string",
-          "default" : "Token",
-          "description" : "",
+        "monitor.DisplayMode": {
+          "type": "string",
+          "default": "Token",
+          "description": "",
           "enum": [
             "Full",
             "Token",
@@ -80,14 +79,25 @@
             "None"
           ]
         },
-
-        "monitor.CexURL":{
-          "type" : "string",
+        "monitor.Cex": {
+          "type": "string",
+          "default": "OKX",
+          "description": "",
+          "enum": [
+            "OKX",
+            "Binance"
+          ]
+        },
+        "monitor.OKXApiURL": {
+          "type": "string",
           "default": "https://www.okx.com/api/v5/market/ticker?instId="
         },
-        
-        "monitor.DexURL":{
-          "type" : "string",
+        "monitor.BinanceApiURL": {
+          "type": "string",
+          "default": "https://fapi.binance.com/fapi/v1/ticker/price?symbol="
+        },
+        "monitor.DexURL": {
+          "type": "string",
           "default": "https://api.dexscreener.com/latest/dex/tokens/"
         }
       }

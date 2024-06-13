@@ -5,9 +5,16 @@ const util = require('./util');
 let tokenPrice = ""; 
 let statusBarItemsArray:[] = [];
 let statusBarItems: vscode.StatusBarItem[] = [];
+let cnt=0
+let cnt2=0
+let intervalId: NodeJS.Timeout |null = null;
 
 export function activate(context: vscode.ExtensionContext){
-    init(); // the main body of the application
+	
+	// testing code
+	// let disposable = vscode.commands.registerCommand('monitor.init',init);
+	// context.subscriptions.push(disposable);
+	init(); // the main body of the application
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(() => handleConfigChange())); // make sure the change of configuration will reflect on the windows on time.
 }
 
@@ -16,6 +23,12 @@ function handleConfigChange() {
 }
 
 function init(){
+    console.log('Your extension is now active!');
+    
+    // clear the timer defined before.
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
 
     // dispose the old statusBar if any.
     for (const statusBarItem of statusBarItems) {
@@ -28,10 +41,11 @@ function init(){
     if(!enable) return;
 
     // get the basic configuration.
-    let intervalId = null;
-    statusBarItemsArray = util.getConfigurationToeknList();
     const updateInterval = util.getConfigurationUpdateInterval();
     const position =vscode.StatusBarAlignment[util.getConfigurationPosition()];
+
+    statusBarItemsArray = util.getConfigurationToeknList();
+    // cexTokenArray, dexTokenArray = tokenArrayClassification(util.getConfigurationToeknList());
 
     // create the items in status bar depends on the number of token.
     for (const item of statusBarItemsArray) {
@@ -39,19 +53,36 @@ function init(){
         statusBarItems.push(statusBarItem);
     }
 
+    console.log(updateInterval);
     // update the token price.
     intervalId = setInterval(() => {
         updatePriceList();
     }, updateInterval); // the polling frequency.
 }
 
+
+
 function updatePriceList(){
-    // TODO: support the search of the dex token price.
-    // TODO: support the cluster search for the cex token.
     for (let i = 0; i < statusBarItemsArray.length; i++) {
-        getCexPrice(statusBarItems[i],statusBarItemsArray[i]); 
+        let token = statusBarItemsArray[i];
+        if ( tokenType(token)){
+            // Cex Token Price
+            getCexPrice(statusBarItems[i], token);
+            // getCexPrice2(statusBarItems[i], token);
+        } else {
+            // Dex Token Price
+            getDexPrice(statusBarItems[i], token);
+        }
         statusBarItems[i].show();
+        // getCexPrice(statusBarItems[i],statusBarItemsArray[i]); 
     }
+}
+
+function tokenType(token:string){
+    if (token.includes('-')) {
+        return true;
+    }
+    return false;
 }
 
 export function deactivate() {
@@ -65,25 +96,63 @@ export function deactivate() {
 }
 
 //TODO: support a uniform function  
-async function getCexPrice(statusBarItem: vscode.StatusBarItem, tokenID:"string"){
+async function getCexPrice(statusBarItem: vscode.StatusBarItem, tokenID:string){
     try {
-        var url =  util.getConfigurationCexURL() + tokenID;
-        const response = await axios.get(url);
-        const price = response.data.data["0"].last;
+        let price;
+        const Cex = util.getCex();
+        if (Cex === 'OKX') {
+            var url =  util.getOKXURL() + tokenID;
+            const response = await axios.get(url);
+            price = response.data.data["0"].last;
+        } else {
+            var url =  util.getBinanceURL() + tokenID.replace('-','');
+            const response = await axios.get(url);
+            price = response.data.price;
+        }
+
         tokenPrice = price.toLocaleString("en-US", { style: "currency", currency: "USD" });
-        statusBarItem.text = util.convertCexTokenName(tokenID)+ ": " + tokenPrice; 
+        statusBarItem.text = util.convertTokenName(tokenID)+ priceOpt(tokenPrice); 
     } catch (error) {
         console.error("Failed to fetch token price:", error);
     }
 }
 
-async function getDexPrice(statusBarItem: vscode.StatusBarItem, tokenID:"string"){
+// TODO: batch request
+// function getCexPrice(statusBarItem: vscode.StatusBarItem, tokenID:string){
+//     let price:any;
+//     const Cex = util.getCex();
+//     if (Cex ==='OKX'){
+//         var url =  util.getOKXURL() + tokenID;
+//         axios.get(url).then((res) =>{
+//             price= res.data.data["0"].last;
+//             tokenPrice = price.toLocaleString("en-US", { style: "currency", currency: "USD" });
+//             statusBarItem.text = util.convertTokenName(tokenID)+ priceOpt(tokenPrice); 
+//         }).catch((error)=>console.error("Failed to fetch token price:", error));
+        
+//     } else {
+//         var url =  util.getBinanceURL() + tokenID.replace('-','');
+//         axios.get(url).then((res) =>{
+//             price= res.data.price;
+//             tokenPrice = price.toLocaleString("en-US", { style: "currency", currency: "USD" });
+//             statusBarItem.text = util.convertTokenName(tokenID)+ priceOpt(tokenPrice);
+//         }).catch((error)=>console.error("Failed to fetch token price:", error));
+        
+//     }
+// }
+
+async function getDexPrice(statusBarItem: vscode.StatusBarItem, tokenID:string){
     try {
         var url =  util.getConfigurationDexURL() + tokenID;
         const response = await axios.get(url);
+        const tokenName = response.data.pairs["0"].baseToken.symbol;
         const price = response.data.pairs["0"].priceUsd;
-        return price.toLocaleString("en-US", { style: "currency", currency: "USD" });
+        tokenPrice = price.toLocaleString("en-US", { style: "currency", currency: "USD" });
+        statusBarItem.text = util.convertTokenName(tokenName) + priceOpt(tokenPrice); 
     } catch(error){
         console.error("Failed to fetch token price:", error);
     }
+}
+
+function priceOpt(tokenPrice:string){
+    return tokenPrice;
 }

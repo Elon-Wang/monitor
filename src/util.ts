@@ -16,12 +16,15 @@ const util = {
         return config.get('monitor.Position')
     },
 
-    convertCexTokenName(tokenID: "string"){
+    convertTokenName(tokenID: "string"){
         const config = vscode.workspace.getConfiguration();
-        const displayMode = config.get('monitor.DisplayMode');
-        const text =    displayMode === 'Full'? tokenID:
-                        displayMode === 'Token'? tokenID.replace('-USDT',''):
-                        displayMode === 'Initials'? tokenID.slice(0,1):''
+        const Mode = config.get('monitor.DisplayMode');
+
+        // console.log(config.monitor);
+        
+        const text =    Mode === 'Full'? tokenID+": ":
+                        Mode === 'Token'? tokenID.replace('USDT','').replace('-','')+": ":
+                        Mode === 'Initials'? tokenID.slice(0,1)+": " : ''
         return text
     },
 
@@ -32,7 +35,27 @@ const util = {
 
     getConfigurationCexURL() {
         const config = vscode.workspace.getConfiguration();
-        return config.get('monitor.CexURL')
+        const Cex = config.get('monitor.Cex');
+        if ( Cex== 'OKX'){
+            return config.get('monitor.OKXApiURL')
+        } else {
+            return config.get('monitor.BinanceApiURL')
+        }
+    },
+
+    getCex(){
+        const config = vscode.workspace.getConfiguration();
+        return config.get('monitor.Cex');
+    },
+
+    getOKXURL() {
+        const config = vscode.workspace.getConfiguration();
+        return config.get('monitor.OKXApiURL')
+    },
+
+    getBinanceURL() {
+        const config = vscode.workspace.getConfiguration();
+        return config.get('monitor.BinanceApiURL')
     },
 
     getConfigurationDexURL() {
